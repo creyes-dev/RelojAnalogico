@@ -22,18 +22,10 @@ Public Class Form1
     Dim LapiceraHoras As New Pen(Color.Red, 2)
 
     Private Sub Form1_Paint(ByVal sender As Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles Me.Paint
-
         ' Dibujar el reloj
         Dim GraficoImagen As Graphics = Me.CreateGraphics
         Dim FiguraReloj As Bitmap = Bitmap.FromFile(Directory.GetCurrentDirectory & "\Reloj.gif", False)
         GraficoImagen.DrawImage(FiguraReloj, New Point(20, 20))
-
-
-
-    End Sub
-
-    Private Sub DibujarReloj()
-
     End Sub
 
     Private Sub Timer1_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Timer1.Tick
@@ -51,13 +43,14 @@ Public Class Form1
 
         ' Obtener la hora actual
         Dim horaFechaActual As Date = DateTime.Now
+        Me.MostrarHoraEnTextBox(horaFechaActual)
 
         Dim HoraActual As Integer = horaFechaActual.Hour
         Dim MinutoActual As Integer = horaFechaActual.Minute
-        Dim SegundoActual As Integer = horaFechaActual.Second
+        ' Dim SegundoActual As Integer = 
 
         ' Mostrar la hora en un textbox
-        Me.MostrarHoraEnTextBox(HoraActual, MinutoActual, SegundoActual)
+
 
         ' Formula cálculo de los radianes de un angulo
         ' RAD = 2*pi*(angulo/angulo maximo)
@@ -65,25 +58,46 @@ Public Class Form1
         ' La misma formula se usa para las agujas del reloj 
         ' 45 = 2*pi*(45/60) = 3*pi/2 Rad
 
-        Dim AnguloSegundo As Single = 2.0 * Math.PI * SegundoActual / 60.0
-        Dim AnguloMinuto As Single = 2.0 * Math.PI * (MinutoActual + SegundoActual / 60.0) / 60.0
-        Dim AnguloHora As Single = 2.0 * Math.PI * (HoraActual + MinutoActual / 60.0) / 12.0
+        ' Convierte los minutos y segundos en un ángulo de la circunferencia
+        ' si la circunferencia posee 360 grados y 
 
-        GraficoAgujasReloj.InterpolationMode = Drawing2D.InterpolationMode.HighQualityBilinear
+        ' Convierte los minutos y segundos en dos ángulos que se forma con las
+        ' agujas del reloj y medidos en grados
 
-        Dim PuntoExtremoAgujaRelojHora As New Point(Convert.ToSingle(50 * Math.Sin(AnguloHora)), Convert.ToSingle(-50 * Math.Cos(AnguloHora)))
+        ' si una circunferencia tiene 360 grados un minuto equivale a 
+        ' 360/60 = 6 grados
+        Dim segundosGrados As Single = horaFechaActual.Second * 6.0 - 90
+        Dim minutosGrados As Single = horaFechaActual.Minute * 6.0 - 90
+
+        ' Si una circunferencia tiene 360 grados una hora equivale a 
+        ' 360/12 = 30 grados
+        Dim horaGrados As Single = horaFechaActual.Hour * 30.0 - 90
+
+        ' Convertir los angulos de los segundos, minutos y horas a radianes
+        ' debido a que las funciones de seno y coseno en .net utilizan radianes
+        Dim segundosRadianes As Single = segundosGrados * (Math.PI / 180.0)
+        Dim minutosRadianes As Single = minutosGrados * (Math.PI / 180.0)
+        Dim horasRadianes As Single = horaGrados * (Math.PI / 180.0)
+
+        ' Con sin(angulo) se obtiene la elevación de un punto de la hipotenusa 
+        ' de un ángulo con cateto en 0 grados  de la circunferencia 
+        ' con cos(angulo) se obtiene la posición horizontal de un punto de la hipotenusa
+        ' de un ángulo con cateto en 0 grados de la circunferencia 
+        ' conociendo el centro del reloj y el cálculo de dicho punto según
+        ' el largo de la hipotenusa (aguja del reloj) es posible dibujar las agujas
+        Dim PuntoExtremoAgujaRelojHora As New Point(Convert.ToSingle(50 * Math.Cos(horasRadianes)), Convert.ToSingle(50 * Math.Sin(horasRadianes)))
         GraficoAgujasReloj.DrawLine(Me.LapiceraHoras, CentroSistemaCoordenadas, PuntoExtremoAgujaRelojHora)
 
-        Dim PuntoExtremoAgujaRelojMinuto As New Point(Convert.ToSingle(70 * Math.Sin(AnguloMinuto)), Convert.ToSingle(-70 * Math.Cos(AnguloMinuto)))
+        Dim PuntoExtremoAgujaRelojMinuto As New Point(Convert.ToSingle(70 * Math.Cos(minutosRadianes)), Convert.ToSingle(70 * Math.Sin(minutosRadianes)))
         GraficoAgujasReloj.DrawLine(Me.LapiceraMinutos, CentroSistemaCoordenadas, PuntoExtremoAgujaRelojMinuto)
 
-        Dim PuntoExtremoAgujaRelojSegundo As New Point(Convert.ToSingle(70 * Math.Sin(AnguloSegundo)), Convert.ToSingle(-70 * Math.Cos(AnguloSegundo)))
+        Dim PuntoExtremoAgujaRelojSegundo As New Point(Convert.ToSingle(70 * Math.Cos(segundosRadianes)), Convert.ToSingle(70 * Math.Sin(segundosRadianes)))
         GraficoAgujasReloj.DrawLine(Me.LapiceraSegundos, CentroSistemaCoordenadas, PuntoExtremoAgujaRelojSegundo)
 
     End Sub
 
-    Public Sub MostrarHoraEnTextBox(ByVal hora As Integer, ByVal minuto As Integer, ByVal segundo As Integer)
-        Me.TextBox1.Text = hora & " : " & minuto & " : " & segundo
+    Public Sub MostrarHoraEnTextBox(ByVal fecha As DateTime)
+        Me.TextBox1.Text = fecha.Hour.ToString() & " : " & fecha.Minute.ToString() & " : " & fecha.Second.ToString()
     End Sub
 
 End Class
