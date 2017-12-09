@@ -45,19 +45,6 @@ Public Class Form1
         Dim horaFechaActual As Date = DateTime.Now
         Me.MostrarHoraEnTextBox(horaFechaActual)
 
-        Dim HoraActual As Integer = horaFechaActual.Hour
-        Dim MinutoActual As Integer = horaFechaActual.Minute
-        ' Dim SegundoActual As Integer = 
-
-        ' Mostrar la hora en un textbox
-
-
-        ' Formula cálculo de los radianes de un angulo
-        ' RAD = 2*pi*(angulo/angulo maximo)
-        ' 270 = 2*pi*(270/360) = 3*pi/2 Rad 
-        ' La misma formula se usa para las agujas del reloj 
-        ' 45 = 2*pi*(45/60) = 3*pi/2 Rad
-
         ' Convierte los minutos y segundos en un ángulo de la circunferencia
         ' si la circunferencia posee 360 grados y 
 
@@ -66,12 +53,23 @@ Public Class Form1
 
         ' si una circunferencia tiene 360 grados un minuto equivale a 
         ' 360/60 = 6 grados
-        Dim segundosGrados As Single = horaFechaActual.Second * 6.0 - 90
-        Dim minutosGrados As Single = horaFechaActual.Minute * 6.0 - 90
+        Dim segundosGrados As Single = horaFechaActual.Second * 6.0
+
+        ' restar 90 grados porque los 0 grados referencia a las 12 en punto 
+        ' que son los 90 grados del sistema de referencia tradicional 
+        segundosGrados = segundosGrados - 90
+
+        ' La aguja de los minutos se mueve a medida de que avanzan los segundos
+        ' si 30 minutos son 180 grados entonces 30 minutos y 30 segundos
+        ' son 30min + (30s/60s) = 30.5min que equivalen a 183 grados
+        Dim minutosGrados As Single = (horaFechaActual.Minute + (horaFechaActual.Second / 60)) * 6.0
+        minutosGrados = minutosGrados - 90
 
         ' Si una circunferencia tiene 360 grados una hora equivale a 
-        ' 360/12 = 30 grados
-        Dim horaGrados As Single = horaFechaActual.Hour * 30.0 - 90
+        ' 360/12 = 30 grados, si 5 horas son 150 grados entonces 5 horas y 15 minutos son 
+        ' 5hs + (15min/60min) = 5.25 horas que equivalen a 157 grados
+        Dim horaGrados As Single = (horaFechaActual.Hour + (horaFechaActual.Minute / 60)) * 30.0
+        horaGrados = horaGrados - 90
 
         ' Convertir los angulos de los segundos, minutos y horas a radianes
         ' debido a que las funciones de seno y coseno en .net utilizan radianes
